@@ -1,0 +1,829 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NutriFlow AI — Plans alimentaires belges, à partir de la prescription</title>
+<meta name="description" content="NutriFlow AI transforme une prescription nutritionnelle en menus adaptés à la cuisine belge et en liste de courses. Pour les diététiciens et leurs patients.">
+
+<!--
+  ATENÇÃO, DIOGENES — duas coisas a preencher antes de publicar:
+
+  1. O e-mail de contato. Está como diogenespsd21@gmail.com em três
+     lugares (procure por "diogenespsd21"). Funciona, mas quando você
+     tiver um endereço do projeto (contact@nutriflow...), troque.
+
+  2. A identidade legal. Hoje diz apenas o seu nome e "Belgique". No dia
+     em que existir empresa, acrescente a razão social, o número de
+     empresa (BCE/KBO) e o endereço — o Artigo 13 do GDPR pede isso do
+     responsável pelo tratamento.
+
+  Sem fontes externas e sem analytics de propósito: uma página que
+  promete não rastrear ninguém não pode carregar script de terceiro.
+-->
+
+<style>
+  :root {
+    --green: #2f7a3c;
+    --green-deep: #16341f;
+    --green-soft: #eaf3ea;
+    --bg: #faf9f6;
+    --card: #ffffff;
+    --text: #16201a;
+    --muted: #5d6b62;
+    --subtle: #8b988f;
+    --border: #e6e3da;
+    --amber: #c98511;
+    --slate: #6d7e93;
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; color-scheme: light; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 22px; }
+  .narrow { max-width: 760px; }
+
+  /* ---------- Fundo vivo ----------
+     Duas manchas desfocadas que se movem devagar. É o que tira a
+     sensação de "papel branco" sem precisar de imagem nem de vídeo. */
+  .blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; }
+  .blob-a {
+    width: 620px; height: 620px; top: -240px; right: -180px;
+    background: radial-gradient(circle at 30% 30%, #cfe6d4, transparent 70%);
+    animation: drift-a 26s ease-in-out infinite alternate;
+  }
+  .blob-b {
+    width: 520px; height: 520px; top: 420px; left: -220px;
+    background: radial-gradient(circle at 60% 40%, #f6e6c8, transparent 70%);
+    animation: drift-b 32s ease-in-out infinite alternate;
+  }
+  @keyframes drift-a { to { transform: translate3d(-70px, 90px, 0) scale(1.12); } }
+  @keyframes drift-b { to { transform: translate3d(80px, -60px, 0) scale(1.08); } }
+
+  /* ---------- Barra do topo ---------- */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(250, 249, 246, 0.82);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+  .mark {
+    width: 34px; height: 34px; border-radius: 11px;
+    background: linear-gradient(145deg, #3f9a4e, #225c2d);
+    display: grid; place-items: center; flex: none;
+    box-shadow: 0 6px 16px rgba(47, 122, 60, 0.32);
+  }
+  .brand-name { font-weight: 700; letter-spacing: -0.3px; font-size: 17px; }
+  .spacer { flex: 1; }
+
+  .langs { display: flex; gap: 2px; }
+  .langs button {
+    border: 1px solid transparent; background: none; color: var(--subtle);
+    font: inherit; font-size: 12.5px; font-weight: 700; letter-spacing: 0.6px;
+    padding: 6px 9px; border-radius: 999px; cursor: pointer;
+    transition: color .18s, background .18s;
+  }
+  .langs button:hover { color: var(--green); }
+  .langs button[aria-pressed="true"] { background: var(--green-soft); color: var(--green); }
+
+  /* ---------- Blocos ---------- */
+  section { padding: 60px 0; }
+  section + section { border-top: 1px solid var(--border); }
+
+  h1 { font-size: clamp(31px, 5.4vw, 46px); line-height: 1.1; letter-spacing: -1.2px; margin: 0 0 16px; }
+  h2 { font-size: 24px; letter-spacing: -0.5px; margin: 0 0 14px; }
+  h3 { font-size: 16.5px; margin: 30px 0 6px; }
+  p { margin: 0 0 14px; color: var(--muted); }
+  h1 + p.lead { font-size: 19px; color: var(--muted); max-width: 52ch; }
+
+  .overline {
+    font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px;
+    color: var(--subtle); margin-bottom: 12px;
+  }
+
+  /* ---------- Abertura em duas colunas ---------- */
+  .hero { display: grid; gap: 40px; align-items: center; padding-top: 46px; }
+  @media (min-width: 900px) {
+    .hero { grid-template-columns: 1.05fr 0.95fr; gap: 30px; padding-top: 64px; }
+  }
+
+  /* ---------- O celular em 3D ----------
+     Perspectiva no palco, rotação no aparelho. O ângulo é fixo no CSS;
+     o mouse só o inclina um pouco em volta disso. */
+  .scene { perspective: 1300px; display: grid; place-items: center; }
+  .phone-float { animation: float 7s ease-in-out infinite alternate; }
+  @keyframes float { to { transform: translateY(-14px); } }
+
+  .phone {
+    position: relative;
+    width: 268px; height: 552px;
+    border-radius: 42px;
+    background: linear-gradient(160deg, #2a2f2b, #141815);
+    padding: 11px;
+    transform-style: preserve-3d;
+    transform: rotateY(-17deg) rotateX(7deg) rotateZ(-1.5deg);
+    box-shadow:
+      0 2px 4px rgba(20, 40, 25, .18),
+      34px 44px 70px -24px rgba(20, 45, 25, .42),
+      0 0 0 1px rgba(0, 0, 0, .3);
+    transition: transform .5s cubic-bezier(.2, .7, .3, 1);
+    will-change: transform;
+  }
+  .phone-screen {
+    position: relative; height: 100%; border-radius: 32px; overflow: hidden;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+  }
+  /* O brilho do vidro. Fica ACIMA da tela, inclinado, e é o que faz o
+     conjunto parecer um objeto e não um retângulo com print dentro. */
+  .glass {
+    position: absolute; inset: 0; border-radius: 32px; pointer-events: none;
+    background: linear-gradient(118deg, rgba(255,255,255,.42) 0%, rgba(255,255,255,.06) 26%, transparent 46%);
+  }
+  .notch {
+    position: absolute; top: 9px; left: 50%; transform: translateX(-50%);
+    width: 92px; height: 22px; border-radius: 999px; background: #141815; z-index: 3;
+  }
+
+  /* Conteúdo dentro da tela */
+  .ui { padding: 40px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+  .ui-title { font-size: 19px; font-weight: 800; letter-spacing: -.5px; }
+  .chips { display: flex; gap: 5px; }
+  .chip {
+    flex: 1; text-align: center; padding: 6px 0; border-radius: 11px;
+    border: 1px solid var(--border); background: #fff;
+    font-size: 10px; font-weight: 700; color: var(--subtle);
+  }
+  .chip strong { display: block; font-size: 12px; color: var(--muted); }
+  .chip.on { background: var(--green); border-color: var(--green); color: #b9dcbf; }
+  .chip.on strong { color: #fff; }
+
+  .ui-card {
+    background: #fff; border-radius: 16px; padding: 12px;
+    box-shadow: 0 8px 18px -10px rgba(20, 58, 29, .28);
+  }
+  .ui-row { display: flex; align-items: center; gap: 12px; }
+  .macro { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .macro-line { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--muted); }
+  .track { height: 5px; border-radius: 999px; background: #eef0ea; overflow: hidden; }
+  .fill { height: 5px; border-radius: 999px; }
+
+  .meal { display: flex; align-items: center; gap: 10px; }
+  .meal-icon { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; flex: none; }
+  .meal-text { flex: 1; min-width: 0; }
+  .meal-over { font-size: 8.5px; font-weight: 800; letter-spacing: .7px; }
+  .meal-name { font-size: 11.5px; font-weight: 700; line-height: 1.25; }
+  .meal-meta { font-size: 9.5px; color: var(--subtle); }
+  .score {
+    width: 21px; height: 21px; border-radius: 7px; display: grid; place-items: center;
+    font-size: 11px; font-weight: 800; flex: none;
+  }
+
+  /* ---------- Passos, com relevo ---------- */
+  .steps { display: grid; gap: 12px; margin-top: 26px; }
+  @media (min-width: 640px) { .steps { grid-template-columns: repeat(3, 1fr); } }
+  .step {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    transition: transform .3s cubic-bezier(.2,.7,.3,1), box-shadow .3s;
+  }
+  .step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 34px -20px rgba(20, 58, 29, .38);
+  }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 999px;
+    background: var(--green-soft); color: var(--green);
+    display: grid; place-items: center; font-weight: 700; font-size: 14px; margin-bottom: 12px;
+  }
+  .step h3 { margin: 0 0 4px; font-size: 15.5px; }
+  .step p { margin: 0; font-size: 14.5px; }
+
+  .panel {
+    background: linear-gradient(150deg, #1c4326, #12291a);
+    color: #fff; border-radius: 24px; padding: 34px;
+    box-shadow: 0 26px 50px -26px rgba(18, 41, 26, .6);
+  }
+  .panel h2 { color: #fff; }
+  .panel p { color: #a9c4b0; margin-bottom: 0; }
+
+  ul { margin: 0 0 14px; padding-left: 20px; color: var(--muted); }
+  li { margin-bottom: 7px; }
+
+  .note {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid var(--green); border-radius: 12px;
+    padding: 16px 18px; margin: 22px 0;
+  }
+  .note p:last-child { margin-bottom: 0; }
+
+  a { color: var(--green); }
+  a:hover { text-decoration: none; }
+  .updated { font-size: 13.5px; color: var(--subtle); }
+
+  footer { border-top: 1px solid var(--border); padding: 30px 0 46px; font-size: 14px; color: var(--subtle); }
+  footer a { color: var(--muted); }
+
+  [data-lang] { display: none; }
+  [data-lang].on { display: block; }
+  span[data-lang].on { display: inline; }
+
+  /* ---------- Entrada ao rolar ---------- */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* Quem pediu menos movimento no sistema recebe a página parada. */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .blob, .phone-float { animation: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .phone { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blobs" aria-hidden="true"><span class="blob blob-a"></span><span class="blob blob-b"></span></div>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top">
+      <span class="mark">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M20 4c0 8.5-4.2 12.5-9.5 12.5A5.5 5.5 0 0 1 5 11c0-4.5 5-7 15-7Z" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"/>
+          <path d="M5.5 20c1.5-4.5 4.5-7.8 9-9.8" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand-name">NutriFlow AI</span>
+    </a>
+    <span class="spacer"></span>
+    <div class="langs" role="group" aria-label="Langue">
+      <button type="button" data-set="fr" aria-pressed="true">FR</button>
+      <button type="button" data-set="nl" aria-pressed="false">NL</button>
+      <button type="button" data-set="en" aria-pressed="false">EN</button>
+      <button type="button" data-set="pt" aria-pressed="false">PT</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ================= ABERTURA ================= -->
+<section class="wrap hero">
+  <div>
+  <div data-lang="fr" class="on">
+    <h1>La prescription du médecin devient un menu que le patient sait cuisiner.</h1>
+    <p class="lead">NutriFlow AI lit une prescription nutritionnelle et en fait des repas adaptés à la cuisine belge, avec les quantités, les valeurs nutritionnelles et la liste de courses. Le diététicien relit et valide avant que le patient reçoive quoi que ce soit.</p>
+  </div>
+  <div data-lang="nl">
+    <h1>Het voorschrift van de arts wordt een menu dat de patiënt kan koken.</h1>
+    <p class="lead">NutriFlow AI leest een voedingsvoorschrift en maakt er maaltijden van die passen bij de Belgische keuken, met hoeveelheden, voedingswaarden en boodschappenlijst. De diëtist kijkt alles na en geeft het vrij voordat de patiënt iets ontvangt.</p>
+  </div>
+  <div data-lang="en">
+    <h1>A nutritional prescription becomes a menu the patient can actually cook.</h1>
+    <p class="lead">NutriFlow AI reads a nutritional prescription and turns it into meals suited to Belgian cooking, with quantities, nutrition figures and a grocery list. The dietitian reviews and releases the plan before the patient sees anything.</p>
+  </div>
+  <div data-lang="pt">
+    <h1>A prescrição do médico vira um cardápio que o paciente sabe cozinhar.</h1>
+    <p class="lead">O NutriFlow AI lê uma prescrição nutricional e a transforma em refeições adaptadas à cozinha belga, com as quantidades, os valores nutricionais e a lista de compras. A nutricionista revisa e libera o plano antes de o paciente ver qualquer coisa.</p>
+  </div>
+  </div>
+
+  <!-- ---------- O aparelho ----------
+       Não é imagem: é a própria tela do app desenhada em HTML e
+       inclinada em 3D pelo CSS. Print vira borrão em tela grande e
+       envelhece junto com a versão do app; isto acompanha o tema. -->
+  <div class="scene" aria-hidden="true">
+    <div class="phone-float">
+      <div class="phone" id="phone">
+        <div class="phone-screen">
+          <span class="notch"></span>
+          <div class="ui">
+            <div class="ui-title">
+              <span data-lang="fr" class="on">Votre menu</span>
+              <span data-lang="nl">Jouw menu</span>
+              <span data-lang="en">Your menu</span>
+              <span data-lang="pt">Seu cardápio</span>
+            </div>
+
+            <div class="chips">
+              <div class="chip on">
+                <span data-lang="fr" class="on">AUJ.</span>
+                <span data-lang="nl">VAND.</span>
+                <span data-lang="en">TODAY</span>
+                <span data-lang="pt">HOJE</span>
+                <strong>1800</strong>
+              </div>
+              <div class="chip">J2<strong>1790</strong></div>
+              <div class="chip">J3<strong>1850</strong></div>
+              <div class="chip">J4<strong>1820</strong></div>
+            </div>
+
+            <div class="ui-card">
+              <div class="ui-row">
+                <svg width="74" height="74" viewBox="0 0 76 76" style="flex:none">
+                  <circle cx="38" cy="38" r="32" stroke="#eef0ea" stroke-width="9" fill="none"/>
+                  <circle cx="38" cy="38" r="32" stroke="#2f7a3c" stroke-width="9" fill="none"
+                          stroke-linecap="round" stroke-dasharray="181 201" transform="rotate(-90 38 38)"/>
+                  <text x="38" y="37" text-anchor="middle" font-size="17" font-weight="800" fill="#16201a">1620</text>
+                  <text x="38" y="48" text-anchor="middle" font-size="8" fill="#8b988f">KCAL</text>
+                </svg>
+                <div class="macro">
+                  <div><div class="macro-line"><span>P</span><span>108 / 120 g</span></div>
+                    <div class="track"><span class="fill" style="width:90%;background:#2f7a3c"></span></div></div>
+                  <div><div class="macro-line"><span>G</span><span>146 / 180 g</span></div>
+                    <div class="track"><span class="fill" style="width:81%;background:#c98511"></span></div></div>
+                  <div><div class="macro-line"><span>L</span><span>44 / 60 g</span></div>
+                    <div class="track"><span class="fill" style="width:73%;background:#6d7e93"></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ui-card meal">
+              <span class="meal-icon" style="background:#2f7a3c">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 12.5l5 5L20 6.5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="meal-text">
+                <span class="meal-over" style="color:#c98511">
+                  <span data-lang="fr" class="on">PETIT-DÉJEUNER</span>
+                  <span data-lang="nl">ONTBIJT</span>
+                  <span data-lang="en">BREAKFAST</span>
+                  <span data-lang="pt">CAFÉ DA MANHÃ</span>
+                </span>
+                <span class="meal-name" style="display:block;text-decoration:line-through;color:#8b988f">Porridge, myrtilles &amp; noix</span>
+                <span class="meal-meta">320 kcal · 10 min</span>
+              </span>
+              <span class="score" style="background:#eaf3ea;color:#2f7a3c">A</span>
+            </div>
+
+            <div class="ui-card meal">
+              <span class="meal-icon" style="background:#eaf3ea">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 11h18M5 11a7 7 0 0 1 14 0M4 15h16M7 19h10" stroke="#2f7a3c" stroke-width="1.9" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <span class="meal-text">
+                <span class="meal-over" style="color:#2f7a3c">
+                  <span data-lang="fr" class="on">DÉJEUNER</span>
+                  <span data-lang="nl">MIDDAGETEN</span>
+                  <span data-lang="en">LUNCH</span>
+                  <span data-lang="pt">ALMOÇO</span>
+                </span>
+                <span class="meal-name" style="display:block">Waterzooi de poulet</span>
+                <span class="meal-meta">420 kcal · 35 min</span>
+              </span>
+              <span class="score" style="background:#eaf3ea;color:#2f7a3c">A</span>
+            </div>
+          </div>
+        </div>
+        <span class="glass"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COMO FUNCIONA ================= -->
+<section class="wrap narrow reveal">
+  <div data-lang="fr" class="on">
+    <div class="overline">COMMENT ÇA MARCHE</div>
+    <h2>Trois étapes, du papier à l'assiette</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>La prescription</h3>
+        <p>Une photo ou un PDF suffit. Les calories, les macros et les interdits alimentaires en sont extraits.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Le menu</h3>
+        <p>Des plats belges revisités plus sainement, jour par jour, dans la langue du patient.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Les courses</h3>
+        <p>La liste regroupée par rayon, avec les noms des produits tels qu'ils figurent en magasin.</p>
+      </div>
+    </div>
+  </div>
+  <div data-lang="nl">
+    <div class="overline">HOE HET WERKT</div>
+    <h2>Drie stappen, van papier tot bord</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Het voorschrift</h3>
+        <p>Een foto of pdf volstaat. Calorieën, macro's en verboden voedingsmiddelen worden eruit gehaald.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Het menu</h3>
+        <p>Belgische gerechten in een gezondere versie, dag per dag, in de taal van de patiënt.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>De boodschappen</h3>
+        <p>De lijst per afdeling gegroepeerd, met de productnamen zoals ze in de winkel staan.</p>
+      </div>
+    </div>
+  </div>
+  <div data-lang="en">
+    <div class="overline">HOW IT WORKS</div>
+    <h2>Three steps, from paper to plate</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>The prescription</h3>
+        <p>A photo or a PDF is enough. Calories, macros and forbidden foods are read from it.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>The menu</h3>
+        <p>Belgian dishes in a healthier version, day by day, in the patient's own language.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>The groceries</h3>
+        <p>A list grouped by aisle, with product names as they appear on Belgian shelves.</p>
+      </div>
+    </div>
+  </div>
+  <div data-lang="pt">
+    <div class="overline">COMO FUNCIONA</div>
+    <h2>Três passos, do papel ao prato</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>A prescrição</h3>
+        <p>Uma foto ou um PDF basta. Calorias, macros e alimentos proibidos são lidos dali.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>O cardápio</h3>
+        <p>Pratos belgas em versão mais saudável, dia por dia, no idioma do paciente.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>As compras</h3>
+        <p>A lista agrupada por seção, com os nomes dos produtos como aparecem na prateleira belga.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PARA O PROFISSIONAL ================= -->
+<section class="wrap narrow reveal">
+  <div class="panel">
+    <div data-lang="fr" class="on">
+      <h2>Le diététicien garde la main</h2>
+      <p>Aucun plan n'arrive chez le patient sans avoir été relu. L'IA propose, le professionnel corrige ou refuse, et c'est lui qui décide du moment où le plan est publié. Les comptes professionnels sont vérifiés : « diététicien » est un titre protégé en Belgique, et le numéro de visa est demandé à l'inscription.</p>
+    </div>
+    <div data-lang="nl">
+      <h2>De diëtist houdt de controle</h2>
+      <p>Geen enkel plan bereikt de patiënt zonder te zijn nagelezen. De AI stelt voor, de professional corrigeert of weigert, en beslist wanneer het plan wordt vrijgegeven. Professionele accounts worden geverifieerd: „diëtist" is in België een beschermde titel, en het visumnummer wordt bij de inschrijving gevraagd.</p>
+    </div>
+    <div data-lang="en">
+      <h2>The dietitian stays in charge</h2>
+      <p>No plan reaches a patient without being reviewed. The AI proposes, the professional corrects or rejects, and decides when the plan is released. Professional accounts are verified: "dietitian" is a protected title in Belgium, and the visa number is required at sign-up.</p>
+    </div>
+    <div data-lang="pt">
+      <h2>Quem decide é a nutricionista</h2>
+      <p>Nenhum plano chega ao paciente sem ter sido revisado. A IA propõe, a profissional corrige ou recusa, e é ela quem escolhe a hora de liberar. As contas profissionais são verificadas: «diététicien» é título protegido na Bélgica, e o número de visa é pedido no cadastro.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRIVACIDADE ================= -->
+<section class="wrap narrow reveal" id="privacy">
+  <div class="overline">
+    <span data-lang="fr" class="on">CONFIDENTIALITÉ</span>
+    <span data-lang="nl">PRIVACY</span>
+    <span data-lang="en">PRIVACY</span>
+    <span data-lang="pt">PRIVACIDADE</span>
+  </div>
+
+  <!-- ---------- FR ---------- -->
+  <div data-lang="fr" class="on">
+    <h2>Politique de confidentialité</h2>
+    <p class="updated">Dernière mise à jour : septembre 2026</p>
+
+    <div class="note">
+      <p><strong>L'essentiel :</strong> la photo ou le PDF de votre prescription n'est jamais enregistré. Le fichier est lu en mémoire, les valeurs en sont extraites, et le fichier disparaît à la fin de la requête. Il n'existe sur aucun disque.</p>
+    </div>
+
+    <h3>Qui traite vos données</h3>
+    <p>Diogenes Fernandes da Silva Arantes, Belgique. Contact : <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+
+    <h3>Ce que nous conservons</h3>
+    <ul>
+      <li>Votre compte : nom, adresse e-mail, langue choisie, et votre rôle (patient ou professionnel).</li>
+      <li>Les valeurs extraites de la prescription : calories, macronutriments, restrictions et aliments interdits.</li>
+      <li>Les menus générés et les repas que vous cochez comme faits.</li>
+      <li>Pour un professionnel : le numéro de visa et le lien avec ses patients.</li>
+    </ul>
+
+    <h3>Base légale</h3>
+    <p>Les données de prescription sont des données de santé, catégorie particulière au sens de l'article 9 du RGPD. Nous les traitons sur la base de votre consentement explicite, donné au moment où vous envoyez la prescription. Vous pouvez le retirer à tout moment en supprimant votre compte.</p>
+
+    <h3>Qui d'autre y a accès</h3>
+    <ul>
+      <li><strong>Le diététicien auquel vous êtes lié</strong>, et lui seul, parmi les professionnels.</li>
+      <li><strong>Supabase</strong> — base de données et authentification, hébergées dans l'Union européenne.</li>
+      <li><strong>Anthropic</strong> — le modèle qui lit la prescription et rédige les recettes.</li>
+      <li><strong>Render</strong> — l'hébergement du serveur applicatif.</li>
+    </ul>
+    <p>Nous ne vendons aucune donnée et n'affichons aucune publicité ciblée.</p>
+
+    <h3>Combien de temps</h3>
+    <p>Les prescriptions et les menus sont supprimés automatiquement après 24 mois. Si vous supprimez votre compte, tout part immédiatement : menus, prescriptions, préférences et le lien avec votre diététicien. Il n'y a ni corbeille ni sauvegarde de récupération.</p>
+
+    <h3>Vos droits</h3>
+    <p>Vous pouvez accéder à vos données, les corriger, les emporter dans un format lisible, ou les faire effacer. La suppression se fait directement dans l'application : <em>Réglages → Supprimer mon compte</em>. Pour le reste, écrivez-nous à l'adresse ci-dessus.</p>
+    <p>Si notre réponse ne vous satisfait pas, vous pouvez introduire une plainte auprès de l'<a href="https://www.autoriteprotectiondonnees.be/citoyen/agir/introduire-une-plainte" rel="noopener">Autorité de protection des données</a>.</p>
+
+    <h3>Ce site</h3>
+    <p>Cette page n'utilise ni cookie, ni outil de mesure d'audience, ni police de caractères chargée depuis un serveur tiers. Rien de ce que vous faites ici n'est enregistré.</p>
+
+    <h3>Liens vers des commerçants</h3>
+    <p>La liste de courses peut renvoyer vers un supermarché partenaire. Si un achat y est effectué, NutriFlow peut percevoir une commission, sans surcoût pour vous. Ces liens ne modifient jamais le contenu d'un menu : les recettes suivent la prescription, pas la commission.</p>
+  </div>
+
+  <!-- ---------- NL ---------- -->
+  <div data-lang="nl">
+    <h2>Privacybeleid</h2>
+    <p class="updated">Laatst bijgewerkt: september 2026</p>
+
+    <div class="note">
+      <p><strong>Het belangrijkste:</strong> de foto of pdf van je voorschrift wordt nooit opgeslagen. Het bestand wordt in het geheugen gelezen, de waarden worden eruit gehaald, en het bestand verdwijnt zodra de aanvraag klaar is. Het staat op geen enkele schijf.</p>
+    </div>
+
+    <h3>Wie je gegevens verwerkt</h3>
+    <p>Diogenes Fernandes da Silva Arantes, België. Contact: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+
+    <h3>Wat we bewaren</h3>
+    <ul>
+      <li>Je account: naam, e-mailadres, gekozen taal en je rol (patiënt of professional).</li>
+      <li>De waarden uit het voorschrift: calorieën, macronutriënten, beperkingen en verboden voedingsmiddelen.</li>
+      <li>De gemaakte menu's en de maaltijden die je als gedaan aanvinkt.</li>
+      <li>Voor een professional: het visumnummer en de koppeling met zijn patiënten.</li>
+    </ul>
+
+    <h3>Rechtsgrond</h3>
+    <p>Voorschriftgegevens zijn gezondheidsgegevens, een bijzondere categorie volgens artikel 9 AVG. We verwerken ze op basis van je uitdrukkelijke toestemming, gegeven op het moment dat je het voorschrift verstuurt. Je kunt die toestemming altijd intrekken door je account te verwijderen.</p>
+
+    <h3>Wie er nog toegang heeft</h3>
+    <ul>
+      <li><strong>De diëtist aan wie je gekoppeld bent</strong>, en als enige professional.</li>
+      <li><strong>Supabase</strong> — database en authenticatie, gehost in de Europese Unie.</li>
+      <li><strong>Anthropic</strong> — het model dat het voorschrift leest en de recepten schrijft.</li>
+      <li><strong>Render</strong> — de hosting van de applicatieserver.</li>
+    </ul>
+    <p>We verkopen geen gegevens en tonen geen gerichte reclame.</p>
+
+    <h3>Hoe lang</h3>
+    <p>Voorschriften en menu's worden na 24 maanden automatisch verwijderd. Verwijder je je account, dan gaat alles meteen weg: menu's, voorschriften, voorkeuren en de koppeling met je diëtist. Er is geen prullenbak en geen herstelback-up.</p>
+
+    <h3>Je rechten</h3>
+    <p>Je kunt je gegevens inzien, corrigeren, meenemen in een leesbaar formaat of laten wissen. Wissen doe je rechtstreeks in de app: <em>Instellingen → Mijn account verwijderen</em>. Voor de rest kun je ons schrijven op het adres hierboven.</p>
+    <p>Ben je niet tevreden met ons antwoord, dan kun je een klacht indienen bij de <a href="https://www.gegevensbeschermingsautoriteit.be/burger/acties/klacht-indienen" rel="noopener">Gegevensbeschermingsautoriteit</a>.</p>
+
+    <h3>Deze website</h3>
+    <p>Deze pagina gebruikt geen cookies, geen bezoekersstatistieken en geen lettertypes van een externe server. Niets van wat je hier doet wordt vastgelegd.</p>
+
+    <h3>Links naar winkels</h3>
+    <p>De boodschappenlijst kan verwijzen naar een partnersupermarkt. Wordt daar iets gekocht, dan kan NutriFlow een commissie ontvangen, zonder meerkost voor jou. Die links veranderen nooit de inhoud van een menu: de recepten volgen het voorschrift, niet de commissie.</p>
+  </div>
+
+  <!-- ---------- EN ---------- -->
+  <div data-lang="en">
+    <h2>Privacy policy</h2>
+    <p class="updated">Last updated: September 2026</p>
+
+    <div class="note">
+      <p><strong>The short version:</strong> the photo or PDF of your prescription is never stored. The file is read in memory, the values are extracted, and the file is gone when the request ends. It exists on no disk.</p>
+    </div>
+
+    <h3>Who processes your data</h3>
+    <p>Diogenes Fernandes da Silva Arantes, Belgium. Contact: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+
+    <h3>What we keep</h3>
+    <ul>
+      <li>Your account: name, email address, chosen language, and your role (patient or professional).</li>
+      <li>The values read from the prescription: calories, macronutrients, restrictions and forbidden foods.</li>
+      <li>The menus generated, and the meals you tick off as done.</li>
+      <li>For a professional: the visa number and the link to their patients.</li>
+    </ul>
+
+    <h3>Legal basis</h3>
+    <p>Prescription data is health data, a special category under Article 9 of the GDPR. We process it on the basis of your explicit consent, given when you send the prescription. You may withdraw it at any time by deleting your account.</p>
+
+    <h3>Who else has access</h3>
+    <ul>
+      <li><strong>The dietitian you are linked to</strong>, and no other professional.</li>
+      <li><strong>Supabase</strong> — database and authentication, hosted in the European Union.</li>
+      <li><strong>Anthropic</strong> — the model that reads the prescription and writes the recipes.</li>
+      <li><strong>Render</strong> — hosting for the application server.</li>
+    </ul>
+    <p>We sell no data and show no targeted advertising.</p>
+
+    <h3>How long</h3>
+    <p>Prescriptions and menus are deleted automatically after 24 months. If you delete your account, everything goes at once: menus, prescriptions, preferences and the link to your dietitian. There is no bin and no recovery backup.</p>
+
+    <h3>Your rights</h3>
+    <p>You can access your data, correct it, take it with you in a readable format, or have it erased. Deletion is done in the app itself: <em>Settings → Delete my account</em>. For anything else, write to the address above.</p>
+    <p>If our answer does not satisfy you, you may lodge a complaint with the Belgian <a href="https://www.dataprotectionauthority.be/citizen" rel="noopener">Data Protection Authority</a>.</p>
+
+    <h3>This website</h3>
+    <p>This page uses no cookies, no analytics and no fonts loaded from a third-party server. Nothing you do here is recorded.</p>
+
+    <h3>Links to retailers</h3>
+    <p>The grocery list may link to a partner supermarket. If a purchase is made there, NutriFlow may earn a commission at no extra cost to you. Those links never change what is in a menu: recipes follow the prescription, not the commission.</p>
+  </div>
+
+  <!-- ---------- PT ---------- -->
+  <div data-lang="pt">
+    <h2>Política de privacidade</h2>
+    <p class="updated">Última atualização: setembro de 2026</p>
+
+    <div class="note">
+      <p><strong>O essencial:</strong> a foto ou o PDF da sua prescrição nunca é gravado. O arquivo é lido na memória, os valores são extraídos dele, e o arquivo desaparece quando o pedido termina. Ele não existe em disco nenhum.</p>
+    </div>
+
+    <h3>Quem trata os seus dados</h3>
+    <p>Diogenes Fernandes da Silva Arantes, Bélgica. Contato: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+
+    <h3>O que guardamos</h3>
+    <ul>
+      <li>A sua conta: nome, e-mail, idioma escolhido e o seu papel (paciente ou profissional).</li>
+      <li>Os valores extraídos da prescrição: calorias, macronutrientes, restrições e alimentos proibidos.</li>
+      <li>Os cardápios gerados e as refeições que você marca como feitas.</li>
+      <li>Para o profissional: o número de visa e o vínculo com os seus pacientes.</li>
+    </ul>
+
+    <h3>Base legal</h3>
+    <p>Dados de prescrição são dados de saúde, categoria especial no Artigo 9 do GDPR. Nós os tratamos com base no seu consentimento explícito, dado no momento em que você envia a prescrição. Você pode retirá-lo a qualquer momento apagando a sua conta.</p>
+
+    <h3>Quem mais tem acesso</h3>
+    <ul>
+      <li><strong>A nutricionista à qual você está vinculado</strong>, e nenhum outro profissional.</li>
+      <li><strong>Supabase</strong> — banco de dados e autenticação, hospedados na União Europeia.</li>
+      <li><strong>Anthropic</strong> — o modelo que lê a prescrição e escreve as receitas.</li>
+      <li><strong>Render</strong> — a hospedagem do servidor do aplicativo.</li>
+    </ul>
+    <p>Não vendemos dado nenhum e não exibimos publicidade dirigida.</p>
+
+    <h3>Por quanto tempo</h3>
+    <p>Prescrições e cardápios são apagados automaticamente depois de 24 meses. Se você apagar a sua conta, tudo vai embora na hora: cardápios, prescrições, preferências e o vínculo com a sua nutricionista. Não há lixeira nem cópia de recuperação.</p>
+
+    <h3>Os seus direitos</h3>
+    <p>Você pode acessar os seus dados, corrigi-los, levá-los num formato legível ou pedir que sejam apagados. O apagamento é feito dentro do próprio aplicativo: <em>Ajustes → Apagar minha conta</em>. Para o resto, escreva para o endereço acima.</p>
+    <p>Se a nossa resposta não satisfizer você, pode apresentar uma reclamação à <a href="https://www.dataprotectionauthority.be/citizen" rel="noopener">autoridade belga de proteção de dados</a>.</p>
+
+    <h3>Este site</h3>
+    <p>Esta página não usa cookie, nem medidor de audiência, nem fonte carregada de servidor de terceiro. Nada do que você faz aqui é registrado.</p>
+
+    <h3>Links para lojas</h3>
+    <p>A lista de compras pode levar a um supermercado parceiro. Se uma compra for feita lá, o NutriFlow pode receber uma comissão, sem custo a mais para você. Esses links nunca mudam o conteúdo de um cardápio: as receitas seguem a prescrição, não a comissão.</p>
+  </div>
+</section>
+
+<!-- ================= CONTATO ================= -->
+<section class="wrap narrow reveal" id="contact">
+  <div data-lang="fr" class="on">
+    <h2>Contact</h2>
+    <p>Questions sur l'application, demandes concernant vos données, ou vous êtes diététicien et souhaitez l'essayer : <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+  </div>
+  <div data-lang="nl">
+    <h2>Contact</h2>
+    <p>Vragen over de app, verzoeken over je gegevens, of ben je diëtist en wil je het uitproberen: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+  </div>
+  <div data-lang="en">
+    <h2>Contact</h2>
+    <p>Questions about the app, requests about your data, or you are a dietitian who would like to try it: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+  </div>
+  <div data-lang="pt">
+    <h2>Contato</h2>
+    <p>Dúvidas sobre o app, pedidos sobre os seus dados, ou você é nutricionista e quer experimentar: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span data-lang="fr" class="on">NutriFlow AI — Belgique. <a href="#privacy">Politique de confidentialité</a></span>
+    <span data-lang="nl">NutriFlow AI — België. <a href="#privacy">Privacybeleid</a></span>
+    <span data-lang="en">NutriFlow AI — Belgium. <a href="#privacy">Privacy policy</a></span>
+    <span data-lang="pt">NutriFlow AI — Bélgica. <a href="#privacy">Política de privacidade</a></span>
+  </div>
+</footer>
+
+<script>
+  // Troca de idioma. Sem biblioteca e sem cookie: a escolha vale para a
+  // visita e some quando a aba fecha, o que é coerente com uma página
+  // que promete não guardar nada de quem a visita.
+  var buttons = document.querySelectorAll('.langs button');
+
+  function setLanguage(code) {
+    document.documentElement.lang = code;
+
+    document.querySelectorAll('[data-lang]').forEach(function (element) {
+      element.classList.toggle('on', element.getAttribute('data-lang') === code);
+    });
+
+    buttons.forEach(function (button) {
+      button.setAttribute('aria-pressed', String(button.dataset.set === code));
+    });
+  }
+
+  buttons.forEach(function (button) {
+    button.addEventListener('click', function () {
+      setLanguage(button.dataset.set);
+    });
+  });
+
+  // Abre no idioma do navegador quando ele é um dos quatro.
+  var browser = (navigator.language || 'fr').slice(0, 2).toLowerCase();
+  if (browser === 'nl' || browser === 'en' || browser === 'pt') setLanguage(browser);
+
+  // ---------------------------------------------------------------
+  // O celular acompanha o mouse.
+  //
+  // A inclinação de base vem do CSS; aqui só somamos alguns graus em
+  // volta dela. Limitado de propósito: passar de ~9 graus faz a tela
+  // "quebrar" visualmente, porque não há profundidade real por trás.
+  // ---------------------------------------------------------------
+  var phone = document.getElementById('phone');
+  var quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var toque = window.matchMedia('(hover: none)').matches;
+
+  if (phone && !quieto && !toque) {
+    var alvoX = 0, alvoY = 0, atualX = 0, atualY = 0, rodando = false;
+
+    function desenhar() {
+      // Aproximação suave: a cada quadro andamos um pedaço da distância
+      // que falta. Seguir o mouse na hora fica nervoso.
+      atualX += (alvoX - atualX) * 0.08;
+      atualY += (alvoY - atualY) * 0.08;
+
+      phone.style.transform =
+        'rotateY(' + (-17 + atualX) + 'deg) rotateX(' + (7 + atualY) + 'deg) rotateZ(-1.5deg)';
+
+      if (Math.abs(alvoX - atualX) > 0.05 || Math.abs(alvoY - atualY) > 0.05) {
+        requestAnimationFrame(desenhar);
+      } else {
+        rodando = false;
+      }
+    }
+
+    window.addEventListener('pointermove', function (evento) {
+      alvoX = ((evento.clientX / window.innerWidth) - 0.5) * 16;
+      alvoY = -((evento.clientY / window.innerHeight) - 0.5) * 10;
+      if (!rodando) { rodando = true; requestAnimationFrame(desenhar); }
+    }, { passive: true });
+
+    // Sem transição enquanto o mouse manda: as duas somadas atrasam.
+    phone.style.transition = 'none';
+  }
+
+  // ---------------------------------------------------------------
+  // Cada bloco entra quando chega perto da tela.
+  // ---------------------------------------------------------------
+  var blocos = document.querySelectorAll('.reveal');
+
+  if ('IntersectionObserver' in window && !quieto) {
+    var observador = new IntersectionObserver(function (entradas) {
+      entradas.forEach(function (entrada) {
+        if (entrada.isIntersecting) {
+          entrada.target.classList.add('in');
+          observador.unobserve(entrada.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -12% 0px' });
+
+    blocos.forEach(function (bloco) { observador.observe(bloco); });
+  } else {
+    // Navegador antigo, ou movimento reduzido: tudo visível de saída.
+    blocos.forEach(function (bloco) { bloco.classList.add('in'); });
+  }
+</script>
+
+</body>
+</html>
