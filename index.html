@@ -3,20 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NutriFlow AI — Plans alimentaires belges, à partir de la prescription</title>
-<meta name="description" content="NutriFlow AI transforme une prescription nutritionnelle en menus adaptés à la cuisine belge et en liste de courses. Pour les diététiciens et leurs patients.">
+<title>Plateo — Plans alimentaires belges, à partir de la prescription</title>
+<link rel="icon" href="favicon.png">
+<meta name="description" content="Plateo transforme une prescription nutritionnelle en menus adaptés à la cuisine belge et en liste de courses. Pour les diététiciens et leurs patients.">
 
 <!--
-  ATENÇÃO, DIOGENES — duas coisas a preencher antes de publicar:
+  ATENÇÃO, DIOGENES — três coisas antes de publicar:
 
-  1. O e-mail de contato. Está como diogenespsd21@gmail.com em três
-     lugares (procure por "diogenespsd21"). Funciona, mas quando você
-     tiver um endereço do projeto (contact@nutriflow...), troque.
+  1. O e-mail contact@plateo.be precisa EXISTIR. Crie o redirecionamento
+     na OVH (Web Cloud → E-mails → Redirecionamentos) apontando para o
+     seu Gmail. Se não fizer hoje, troque as quatro ocorrências de
+     "contact@plateo.be" de volta para o seu endereço do Gmail — uma
+     página que publica um e-mail que devolve mensagem é pior que uma
+     sem e-mail nenhum.
 
-  2. A identidade legal. Hoje diz apenas o seu nome e "Belgique". No dia
-     em que existir empresa, acrescente a razão social, o número de
-     empresa (BCE/KBO) e o endereço — o Artigo 13 do GDPR pede isso do
-     responsável pelo tratamento.
+  2. A identidade legal, na política de privacidade. O Artigo 13 do
+     GDPR obriga a dizer QUEM é o responsável pelo tratamento. Hoje está
+     o seu nome e "Belgique". No dia em que existir empresa, acrescente
+     a razão social, o número BCE/KBO e o endereço.
+
+  3. O arquivo favicon.png, ao lado deste index.html. Está no pacote de
+     logos do Plateo.
 
   Sem fontes externas e sem analytics de propósito: uma página que
   promete não rastrear ninguém não pode carregar script de terceiro.
@@ -24,15 +31,15 @@
 
 <style>
   :root {
-    --green: #2f7a3c;
-    --green-deep: #16341f;
-    --green-soft: #eaf3ea;
+    --green: #14615c;
+    --green-deep: #0b3733;
+    --green-soft: #e3efee;
     --bg: #faf9f6;
     --card: #ffffff;
-    --text: #16201a;
-    --muted: #5d6b62;
-    --subtle: #8b988f;
-    --border: #e6e3da;
+    --text: #152220;
+    --muted: #5b6b68;
+    --subtle: #8b9a97;
+    --border: #e4e4dd;
     --amber: #c98511;
     --slate: #6d7e93;
     --radius: 18px;
@@ -62,7 +69,7 @@
   .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.5; }
   .blob-a {
     width: 620px; height: 620px; top: -240px; right: -180px;
-    background: radial-gradient(circle at 30% 30%, #cfe6d4, transparent 70%);
+    background: radial-gradient(circle at 30% 30%, #c8e2df, transparent 70%);
     animation: drift-a 26s ease-in-out infinite alternate;
   }
   .blob-b {
@@ -85,9 +92,9 @@
   .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
   .mark {
     width: 34px; height: 34px; border-radius: 11px;
-    background: linear-gradient(145deg, #3f9a4e, #225c2d);
+    background: linear-gradient(145deg, #1d7d76, #0e4a45);
     display: grid; place-items: center; flex: none;
-    box-shadow: 0 6px 16px rgba(47, 122, 60, 0.32);
+    box-shadow: 0 6px 16px rgba(20, 97, 92, 0.32);
   }
   .brand-name { font-weight: 700; letter-spacing: -0.3px; font-size: 17px; }
   .spacer { flex: 1; }
@@ -171,7 +178,7 @@
     font-size: 10px; font-weight: 700; color: var(--subtle);
   }
   .chip strong { display: block; font-size: 12px; color: var(--muted); }
-  .chip.on { background: var(--green); border-color: var(--green); color: #b9dcbf; }
+  .chip.on { background: var(--green); border-color: var(--green); color: #bfe0dd; }
   .chip.on strong { color: #fff; }
 
   .ui-card {
@@ -216,12 +223,12 @@
   .step p { margin: 0; font-size: 14.5px; }
 
   .panel {
-    background: linear-gradient(150deg, #1c4326, #12291a);
+    background: linear-gradient(150deg, #114641, #08302c);
     color: #fff; border-radius: 24px; padding: 34px;
     box-shadow: 0 26px 50px -26px rgba(18, 41, 26, .6);
   }
   .panel h2 { color: #fff; }
-  .panel p { color: #a9c4b0; margin-bottom: 0; }
+  .panel p { color: #a3c6c2; margin-bottom: 0; }
 
   ul { margin: 0 0 14px; padding-left: 20px; color: var(--muted); }
   li { margin-bottom: 7px; }
@@ -266,11 +273,11 @@
     <a class="brand" href="#top">
       <span class="mark">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M20 4c0 8.5-4.2 12.5-9.5 12.5A5.5 5.5 0 0 1 5 11c0-4.5 5-7 15-7Z" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"/>
-          <path d="M5.5 20c1.5-4.5 4.5-7.8 9-9.8" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M17.9 18.6A9 9 0 1 1 20 12" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="5" fill="#fff"/>
         </svg>
       </span>
-      <span class="brand-name">NutriFlow AI</span>
+      <span class="brand-name">Plateo</span>
     </a>
     <span class="spacer"></span>
     <div class="langs" role="group" aria-label="Langue">
@@ -289,19 +296,19 @@
   <div>
   <div data-lang="fr" class="on">
     <h1>La prescription du médecin devient un menu que le patient sait cuisiner.</h1>
-    <p class="lead">NutriFlow AI lit une prescription nutritionnelle et en fait des repas adaptés à la cuisine belge, avec les quantités, les valeurs nutritionnelles et la liste de courses. Le diététicien relit et valide avant que le patient reçoive quoi que ce soit.</p>
+    <p class="lead">Plateo lit une prescription nutritionnelle et en fait des repas adaptés à la cuisine belge, avec les quantités, les valeurs nutritionnelles et la liste de courses. Le diététicien relit et valide avant que le patient reçoive quoi que ce soit.</p>
   </div>
   <div data-lang="nl">
     <h1>Het voorschrift van de arts wordt een menu dat de patiënt kan koken.</h1>
-    <p class="lead">NutriFlow AI leest een voedingsvoorschrift en maakt er maaltijden van die passen bij de Belgische keuken, met hoeveelheden, voedingswaarden en boodschappenlijst. De diëtist kijkt alles na en geeft het vrij voordat de patiënt iets ontvangt.</p>
+    <p class="lead">Plateo leest een voedingsvoorschrift en maakt er maaltijden van die passen bij de Belgische keuken, met hoeveelheden, voedingswaarden en boodschappenlijst. De diëtist kijkt alles na en geeft het vrij voordat de patiënt iets ontvangt.</p>
   </div>
   <div data-lang="en">
     <h1>A nutritional prescription becomes a menu the patient can actually cook.</h1>
-    <p class="lead">NutriFlow AI reads a nutritional prescription and turns it into meals suited to Belgian cooking, with quantities, nutrition figures and a grocery list. The dietitian reviews and releases the plan before the patient sees anything.</p>
+    <p class="lead">Plateo reads a nutritional prescription and turns it into meals suited to Belgian cooking, with quantities, nutrition figures and a grocery list. The dietitian reviews and releases the plan before the patient sees anything.</p>
   </div>
   <div data-lang="pt">
     <h1>A prescrição do médico vira um cardápio que o paciente sabe cozinhar.</h1>
-    <p class="lead">O NutriFlow AI lê uma prescrição nutricional e a transforma em refeições adaptadas à cozinha belga, com as quantidades, os valores nutricionais e a lista de compras. A nutricionista revisa e libera o plano antes de o paciente ver qualquer coisa.</p>
+    <p class="lead">O Plateo lê uma prescrição nutricional e a transforma em refeições adaptadas à cozinha belga, com as quantidades, os valores nutricionais e a lista de compras. A nutricionista revisa e libera o plano antes de o paciente ver qualquer coisa.</p>
   </div>
   </div>
 
@@ -339,14 +346,14 @@
               <div class="ui-row">
                 <svg width="74" height="74" viewBox="0 0 76 76" style="flex:none">
                   <circle cx="38" cy="38" r="32" stroke="#eef0ea" stroke-width="9" fill="none"/>
-                  <circle cx="38" cy="38" r="32" stroke="#2f7a3c" stroke-width="9" fill="none"
+                  <circle cx="38" cy="38" r="32" stroke="#14615c" stroke-width="9" fill="none"
                           stroke-linecap="round" stroke-dasharray="181 201" transform="rotate(-90 38 38)"/>
-                  <text x="38" y="37" text-anchor="middle" font-size="17" font-weight="800" fill="#16201a">1620</text>
-                  <text x="38" y="48" text-anchor="middle" font-size="8" fill="#8b988f">KCAL</text>
+                  <text x="38" y="37" text-anchor="middle" font-size="17" font-weight="800" fill="#152220">1620</text>
+                  <text x="38" y="48" text-anchor="middle" font-size="8" fill="#8b9a97">KCAL</text>
                 </svg>
                 <div class="macro">
                   <div><div class="macro-line"><span>P</span><span>108 / 120 g</span></div>
-                    <div class="track"><span class="fill" style="width:90%;background:#2f7a3c"></span></div></div>
+                    <div class="track"><span class="fill" style="width:90%;background:#14615c"></span></div></div>
                   <div><div class="macro-line"><span>G</span><span>146 / 180 g</span></div>
                     <div class="track"><span class="fill" style="width:81%;background:#c98511"></span></div></div>
                   <div><div class="macro-line"><span>L</span><span>44 / 60 g</span></div>
@@ -356,7 +363,7 @@
             </div>
 
             <div class="ui-card meal">
-              <span class="meal-icon" style="background:#2f7a3c">
+              <span class="meal-icon" style="background:#14615c">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
                   <path d="M4 12.5l5 5L20 6.5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -368,20 +375,20 @@
                   <span data-lang="en">BREAKFAST</span>
                   <span data-lang="pt">CAFÉ DA MANHÃ</span>
                 </span>
-                <span class="meal-name" style="display:block;text-decoration:line-through;color:#8b988f">Porridge, myrtilles &amp; noix</span>
+                <span class="meal-name" style="display:block;text-decoration:line-through;color:#8b9a97">Porridge, myrtilles &amp; noix</span>
                 <span class="meal-meta">320 kcal · 10 min</span>
               </span>
-              <span class="score" style="background:#eaf3ea;color:#2f7a3c">A</span>
+              <span class="score" style="background:#e3efee;color:#14615c">A</span>
             </div>
 
             <div class="ui-card meal">
-              <span class="meal-icon" style="background:#eaf3ea">
+              <span class="meal-icon" style="background:#e3efee">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 11h18M5 11a7 7 0 0 1 14 0M4 15h16M7 19h10" stroke="#2f7a3c" stroke-width="1.9" stroke-linecap="round"/>
+                  <path d="M3 11h18M5 11a7 7 0 0 1 14 0M4 15h16M7 19h10" stroke="#14615c" stroke-width="1.9" stroke-linecap="round"/>
                 </svg>
               </span>
               <span class="meal-text">
-                <span class="meal-over" style="color:#2f7a3c">
+                <span class="meal-over" style="color:#14615c">
                   <span data-lang="fr" class="on">DÉJEUNER</span>
                   <span data-lang="nl">MIDDAGETEN</span>
                   <span data-lang="en">LUNCH</span>
@@ -390,7 +397,7 @@
                 <span class="meal-name" style="display:block">Waterzooi de poulet</span>
                 <span class="meal-meta">420 kcal · 35 min</span>
               </span>
-              <span class="score" style="background:#eaf3ea;color:#2f7a3c">A</span>
+              <span class="score" style="background:#e3efee;color:#14615c">A</span>
             </div>
           </div>
         </div>
@@ -529,7 +536,7 @@
     </div>
 
     <h3>Qui traite vos données</h3>
-    <p>Diogenes Fernandes da Silva Arantes, Belgique. Contact : <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+    <p>Diogenes Fernandes da Silva Arantes, Belgique. Contact : <a href="mailto:contact@plateo.be">contact@plateo.be</a>.</p>
 
     <h3>Ce que nous conservons</h3>
     <ul>
@@ -562,7 +569,7 @@
     <p>Cette page n'utilise ni cookie, ni outil de mesure d'audience, ni police de caractères chargée depuis un serveur tiers. Rien de ce que vous faites ici n'est enregistré.</p>
 
     <h3>Liens vers des commerçants</h3>
-    <p>La liste de courses peut renvoyer vers un supermarché partenaire. Si un achat y est effectué, NutriFlow peut percevoir une commission, sans surcoût pour vous. Ces liens ne modifient jamais le contenu d'un menu : les recettes suivent la prescription, pas la commission.</p>
+    <p>La liste de courses peut renvoyer vers un supermarché partenaire. Si un achat y est effectué, Plateo peut percevoir une commission, sans surcoût pour vous. Ces liens ne modifient jamais le contenu d'un menu : les recettes suivent la prescription, pas la commission.</p>
   </div>
 
   <!-- ---------- NL ---------- -->
@@ -575,7 +582,7 @@
     </div>
 
     <h3>Wie je gegevens verwerkt</h3>
-    <p>Diogenes Fernandes da Silva Arantes, België. Contact: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+    <p>Diogenes Fernandes da Silva Arantes, België. Contact: <a href="mailto:contact@plateo.be">contact@plateo.be</a>.</p>
 
     <h3>Wat we bewaren</h3>
     <ul>
@@ -608,7 +615,7 @@
     <p>Deze pagina gebruikt geen cookies, geen bezoekersstatistieken en geen lettertypes van een externe server. Niets van wat je hier doet wordt vastgelegd.</p>
 
     <h3>Links naar winkels</h3>
-    <p>De boodschappenlijst kan verwijzen naar een partnersupermarkt. Wordt daar iets gekocht, dan kan NutriFlow een commissie ontvangen, zonder meerkost voor jou. Die links veranderen nooit de inhoud van een menu: de recepten volgen het voorschrift, niet de commissie.</p>
+    <p>De boodschappenlijst kan verwijzen naar een partnersupermarkt. Wordt daar iets gekocht, dan kan Plateo een commissie ontvangen, zonder meerkost voor jou. Die links veranderen nooit de inhoud van een menu: de recepten volgen het voorschrift, niet de commissie.</p>
   </div>
 
   <!-- ---------- EN ---------- -->
@@ -621,7 +628,7 @@
     </div>
 
     <h3>Who processes your data</h3>
-    <p>Diogenes Fernandes da Silva Arantes, Belgium. Contact: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+    <p>Diogenes Fernandes da Silva Arantes, Belgium. Contact: <a href="mailto:contact@plateo.be">contact@plateo.be</a>.</p>
 
     <h3>What we keep</h3>
     <ul>
@@ -654,7 +661,7 @@
     <p>This page uses no cookies, no analytics and no fonts loaded from a third-party server. Nothing you do here is recorded.</p>
 
     <h3>Links to retailers</h3>
-    <p>The grocery list may link to a partner supermarket. If a purchase is made there, NutriFlow may earn a commission at no extra cost to you. Those links never change what is in a menu: recipes follow the prescription, not the commission.</p>
+    <p>The grocery list may link to a partner supermarket. If a purchase is made there, Plateo may earn a commission at no extra cost to you. Those links never change what is in a menu: recipes follow the prescription, not the commission.</p>
   </div>
 
   <!-- ---------- PT ---------- -->
@@ -667,7 +674,7 @@
     </div>
 
     <h3>Quem trata os seus dados</h3>
-    <p>Diogenes Fernandes da Silva Arantes, Bélgica. Contato: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+    <p>Diogenes Fernandes da Silva Arantes, Bélgica. Contato: <a href="mailto:contact@plateo.be">contact@plateo.be</a>.</p>
 
     <h3>O que guardamos</h3>
     <ul>
@@ -700,7 +707,7 @@
     <p>Esta página não usa cookie, nem medidor de audiência, nem fonte carregada de servidor de terceiro. Nada do que você faz aqui é registrado.</p>
 
     <h3>Links para lojas</h3>
-    <p>A lista de compras pode levar a um supermercado parceiro. Se uma compra for feita lá, o NutriFlow pode receber uma comissão, sem custo a mais para você. Esses links nunca mudam o conteúdo de um cardápio: as receitas seguem a prescrição, não a comissão.</p>
+    <p>A lista de compras pode levar a um supermercado parceiro. Se uma compra for feita lá, o Plateo pode receber uma comissão, sem custo a mais para você. Esses links nunca mudam o conteúdo de um cardápio: as receitas seguem a prescrição, não a comissão.</p>
   </div>
 </section>
 
@@ -708,19 +715,19 @@
 <section class="wrap narrow reveal" id="contact">
   <div data-lang="fr" class="on">
     <h2>Contact</h2>
-    <p>Questions sur l'application, demandes concernant vos données, ou vous êtes diététicien et souhaitez l'essayer : <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+    <p>Questions sur l'application, demandes concernant vos données, ou vous êtes diététicien et souhaitez l'essayer : <a href="mailto:contact@plateo.be">contact@plateo.be</a>.</p>
   </div>
   <div data-lang="nl">
     <h2>Contact</h2>
-    <p>Vragen over de app, verzoeken over je gegevens, of ben je diëtist en wil je het uitproberen: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+    <p>Vragen over de app, verzoeken over je gegevens, of ben je diëtist en wil je het uitproberen: <a href="mailto:contact@plateo.be">contact@plateo.be</a>.</p>
   </div>
   <div data-lang="en">
     <h2>Contact</h2>
-    <p>Questions about the app, requests about your data, or you are a dietitian who would like to try it: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+    <p>Questions about the app, requests about your data, or you are a dietitian who would like to try it: <a href="mailto:contact@plateo.be">contact@plateo.be</a>.</p>
   </div>
   <div data-lang="pt">
     <h2>Contato</h2>
-    <p>Dúvidas sobre o app, pedidos sobre os seus dados, ou você é nutricionista e quer experimentar: <a href="mailto:diogenespsd21@gmail.com">diogenespsd21@gmail.com</a>.</p>
+    <p>Dúvidas sobre o app, pedidos sobre os seus dados, ou você é nutricionista e quer experimentar: <a href="mailto:contact@plateo.be">contact@plateo.be</a>.</p>
   </div>
 </section>
 
@@ -728,10 +735,10 @@
 
 <footer>
   <div class="wrap">
-    <span data-lang="fr" class="on">NutriFlow AI — Belgique. <a href="#privacy">Politique de confidentialité</a></span>
-    <span data-lang="nl">NutriFlow AI — België. <a href="#privacy">Privacybeleid</a></span>
-    <span data-lang="en">NutriFlow AI — Belgium. <a href="#privacy">Privacy policy</a></span>
-    <span data-lang="pt">NutriFlow AI — Bélgica. <a href="#privacy">Política de privacidade</a></span>
+    <span data-lang="fr" class="on">Plateo — Belgique. <a href="#privacy">Politique de confidentialité</a></span>
+    <span data-lang="nl">Plateo — België. <a href="#privacy">Privacybeleid</a></span>
+    <span data-lang="en">Plateo — Belgium. <a href="#privacy">Privacy policy</a></span>
+    <span data-lang="pt">Plateo — Bélgica. <a href="#privacy">Política de privacidade</a></span>
   </div>
 </footer>
 
